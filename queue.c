@@ -18,6 +18,7 @@ queue_t *q_new()
         return NULL;
     q->head = NULL;
     q->tail = NULL;
+    q->size = 0;
     return q;
 }
 
@@ -45,8 +46,6 @@ bool q_insert_head(queue_t *q, char *s)
     newh = malloc(sizeof(list_ele_t));
     if (!newh)
         return false;
-    /* Don't forget to allocate space for the string and copy it */
-    /* What if either call to malloc returns NULL? */
     int sSize = strlen(s) + 1;
     newh->value = malloc(sSize);
     strlcpy(newh->value, s, sSize);
@@ -54,6 +53,7 @@ bool q_insert_head(queue_t *q, char *s)
     if (!q->head)
         q->tail = newh;
     q->head = newh;
+    q->size += 1;
     return true;
 }
 
@@ -66,9 +66,6 @@ bool q_insert_head(queue_t *q, char *s)
  */
 bool q_insert_tail(queue_t *q, char *s)
 {
-    /* TODO: You need to write the complete code for this function */
-    /* Remember: It should operate in O(1) time */
-    /* TODO: Remove the above comment when you are about to implement. */
     if (!q)
         return NULL;
     list_ele_t *newt;
@@ -81,6 +78,7 @@ bool q_insert_tail(queue_t *q, char *s)
     newt->next = NULL;
     q->tail->next = newt;
     q->tail = newt;
+    q->size += 1;
     return true;
 }
 
@@ -106,9 +104,8 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
  */
 int q_size(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* Remember: It should operate in O(1) time */
-    /* TODO: Remove the above comment when you are about to implement. */
+    if (!q)
+        return false;
     return q->size;
 }
 
@@ -121,8 +118,21 @@ int q_size(queue_t *q)
  */
 void q_reverse(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
+    if (q) {
+        list_ele_t *prev, *curr;
+        q->tail = q->head;
+        curr = q->head->next;
+        q->head->next = NULL;
+        prev = q->head;
+        q->head = curr;
+        while (q->head->next) {
+            curr = q->head->next;
+            q->head->next = prev;
+            prev = q->head;
+            q->head = curr;
+        }
+        q->head->next = prev;
+    }
 }
 
 /*
