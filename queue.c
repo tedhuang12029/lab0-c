@@ -25,11 +25,17 @@ queue_t *q_new()
 /* Free all storage used by queue */
 void q_free(queue_t *q)
 {
-    /* TODO: How about freeing the list elements and the strings? */
-    /* Free queue structure */
+    if (q) {
+        list_ele_t *curr = q->head;
+        while (curr) {
+            list_ele_t *tmp = curr;
+            curr = curr->next;
+            free(tmp->value);
+            free(tmp);
+        }
+    }
     free(q);
 }
-
 /*
  * Attempt to insert element at head of queue.
  * Return true if successful.
@@ -42,12 +48,16 @@ bool q_insert_head(queue_t *q, char *s)
     list_ele_t *newh;
     /* TODO: What should you do if the q is NULL? */
     if (!q)
-        return NULL;
+        return false;
     newh = malloc(sizeof(list_ele_t));
     if (!newh)
         return false;
     int sSize = strlen(s) + 1;
     newh->value = malloc(sSize);
+    if (!newh->value) {
+        free(newh);
+        return false;
+    }
     strlcpy(newh->value, s, sSize);
     newh->next = q->head;
     if (!q->head)
@@ -74,6 +84,10 @@ bool q_insert_tail(queue_t *q, char *s)
         return false;
     int sSize = strlen(s) + 1;
     newt->value = malloc(sSize);
+    if (!newt->value) {
+        free(newt);
+        return NULL;
+    }
     strlcpy(newt->value, s, sSize);
     newt->next = NULL;
     q->tail->next = newt;
@@ -94,7 +108,18 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
 {
     /* TODO: You need to fix up this code. */
     /* TODO: Remove the above comment when you are about to implement. */
-    q->head = q->head->next;
+    if ((q != NULL) && (q->size != 0)) {
+        list_ele_t *tmp = q->head;
+        if (sp) {
+            strlcpy(sp, tmp->value, bufsize);
+        }
+        q->head = q->head->next;
+        free(tmp->value);
+        free(tmp);
+        q->size -= 1;
+    } else {
+        return false;
+    }
     return true;
 }
 
@@ -118,18 +143,15 @@ int q_size(queue_t *q)
  */
 void q_reverse(queue_t *q)
 {
-    if (q) {
-        list_ele_t *prev, *curr;
+    if ((q != 0) && (q->size != 0)) {
+        list_ele_t *prev = NULL;
+        list_ele_t *tmp;
         q->tail = q->head;
-        curr = q->head->next;
-        q->head->next = NULL;
-        prev = q->head;
-        q->head = curr;
         while (q->head->next) {
-            curr = q->head->next;
+            tmp = q->head->next;
             q->head->next = prev;
             prev = q->head;
-            q->head = curr;
+            q->head = tmp;
         }
         q->head->next = prev;
     }
@@ -144,4 +166,42 @@ void q_sort(queue_t *q)
 {
     /* TODO: You need to write the code for this function */
     /* TODO: Remove the above comment when you are about to implement. */
+    // bubble sort
+    if ((q != 0) && (q->size != 0)) {
+        list_ele_t *tmp, *curr, *prev;
+
+        // get Linked list size first
+        int tmp1, tmp2;
+        for (int i = q->size; i > 0; i--) {
+            curr = q->head;
+            prev = q->head;
+            for (int j = 0; j < i - 1 && curr->next; j++) {
+                // Compares two elements, and swaps if current is bigger than
+                // next
+                tmp1 = strlen(curr->value);
+                tmp2 = strlen(curr->next->value);
+
+                if (tmp1 > tmp2) {
+                    if (curr->next == q->tail)
+                        q->tail = curr;
+                    tmp = curr->next;
+                    curr->next = tmp->next;
+                    tmp->next = curr;
+                    // In linked list, swap has two case. In head or not.
+
+                    if (curr == q->head) {
+                        q->head = tmp;
+                        prev = tmp;
+                    } else {
+                        prev->next = tmp;
+                        prev = prev->next;
+                    }
+                } else {
+                    curr = curr->next;
+                    if (j != 0)
+                        prev = prev->next;
+                }
+            }
+        }
+    }
 }
