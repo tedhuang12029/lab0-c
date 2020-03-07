@@ -162,46 +162,80 @@ void q_reverse(queue_t *q)
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
+
+// void q_sort(queue_t *q)
+// {
+//     /* TODO: You need to write the code for this function */
+//     /* TODO: Remove the above comment when you are about to implement. */
+//     // bubble sort
+//     if ((q != 0) && (q->size != 0)) {
+//         list_ele_t *tmp, *curr, *prev;
+
+//         // get Linked list size first
+//         for (int i = q->size; i > 0; i--) {
+//             curr = q->head;
+//             prev = q->head;
+//             for (int j = 0; j < i - 1 && curr->next; j++) {
+//                 // Compares two elements, and swaps if current is bigger than
+//                 // next
+//                 if (strcasecmp(curr->value,curr->next->value)>0) {
+//                     if (curr->next == q->tail)
+//                         q->tail = curr;
+//                     tmp = curr->next;
+//                     curr->next = tmp->next;
+//                     tmp->next = curr;
+//                     // In linked list, swap has two case. In head or not.
+
+//                     if (curr == q->head) {
+//                         q->head = tmp;
+//                         prev = tmp;
+//                     } else {
+//                         prev->next = tmp;
+//                         prev = prev->next;
+//                     }
+//                 } else {
+//                     curr = curr->next;
+//                     if (j != 0)
+//                         prev = prev->next;
+//                 }
+//             }
+//         }
+//     }
+// }
+
 void q_sort(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
-    // bubble sort
-    if ((q != 0) && (q->size != 0)) {
-        list_ele_t *tmp, *curr, *prev;
+    if ((q != 0) && (q->size != 0))
+        q->head = sort(q->head);
+}
+list_ele_t *sort(list_ele_t *start)
+{
+    if (!start || !start->next)
+        return start;
+    list_ele_t *left = start;
+    list_ele_t *right = left->next;
+    left->next = NULL;
+    left = sort(left);
+    right = sort(right);
 
-        // get Linked list size first
-        int tmp1, tmp2;
-        for (int i = q->size; i > 0; i--) {
-            curr = q->head;
-            prev = q->head;
-            for (int j = 0; j < i - 1 && curr->next; j++) {
-                // Compares two elements, and swaps if current is bigger than
-                // next
-                tmp1 = strlen(curr->value);
-                tmp2 = strlen(curr->next->value);
-
-                if (tmp1 > tmp2) {
-                    if (curr->next == q->tail)
-                        q->tail = curr;
-                    tmp = curr->next;
-                    curr->next = tmp->next;
-                    tmp->next = curr;
-                    // In linked list, swap has two case. In head or not.
-
-                    if (curr == q->head) {
-                        q->head = tmp;
-                        prev = tmp;
-                    } else {
-                        prev->next = tmp;
-                        prev = prev->next;
-                    }
-                } else {
-                    curr = curr->next;
-                    if (j != 0)
-                        prev = prev->next;
-                }
+    for (list_ele_t *merge = NULL; left || right;) {
+        if (!right || (left && (strcasecmp(right->value, left->value) > 0))) {
+            if (!merge) {
+                start = merge = left;
+            } else {
+                merge->next = left;
+                merge = merge->next;
             }
+            left = left->next;
+        } else {
+            if (!merge) {
+                start = merge = right;
+            } else {
+                merge->next = right;
+                merge = merge->next;
+            }
+            right = right->next;
         }
     }
+    return start;
 }
